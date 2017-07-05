@@ -3,8 +3,13 @@
 
 
 function derive(xs, ys){
-	n = xs.length;
-	console.log(n)
+	var derivs = [];
+	ys.unshift(ys[0] - (ys[1] - ys[0]));
+	ys.push(ys[ys.length - 1] - (ys[ys.length -1] - ys[ys.length - 2]));
+	// Pad first and last values of our function to make derivs easier
+	for (i = 0; i < xs.length; i++){
+		derivs.push((ys[i+2] - ys[i])/20); 
+	}
+	return derivs;
 }
 
-derive([0,1], [2,3]);
