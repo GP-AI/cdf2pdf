@@ -41,6 +41,17 @@ circle {
   fill: #ff7f0e;
   stroke: #ff7f0e;
 }
+.derive_button{
+  height:50px;
+  margin-top:20px;
+  margin-left:auto;
+  margin-right:auto;
+  border:1px solid black;
+  text-align: center;
+  width:100px;
+  vertical-align: center;
+}
+
 
 </style>
 <form>
@@ -191,6 +202,12 @@ d3.select("#derive")
 
 svg.node().focus();
 svg2.node().focus();
+
+d3.select("body").append("div")
+.text("Click me to generate PDF")
+.attr("class", "derive_button")
+.on("mousedown", function(d) { selected = dragged = d; redraw_derivative(); });
+
 
 function redraw() {
   svg.select("path").attr("d", line);
