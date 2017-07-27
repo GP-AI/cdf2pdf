@@ -349,10 +349,10 @@ function mousemove() {
   
 // Ensure that CDF is increasing
   if (circ_index > 0){
-    dragged[1] = Math.max(0, Math.min(circs[0][circ_index -1].__data__[1], m[1]));
+    dragged[1] = Math.max(0 + 1.1/300, Math.min(circs[0][circ_index -1].__data__[1], m[1]));
   }
   else {
-    dragged[1] = Math.max(0, Math.min(height, m[1]));
+    dragged[1] = Math.max(0 + 1.1/300, Math.min(height - 20, m[1]));
   }
   //console.log(m);
   redraw();
