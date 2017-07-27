@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Spline Editor</title>
+<title>Forecasting</title>
 <style>
 
 body {
   font: 13px sans-serif;
   position: relative;
-  width: 960px;
+  width: 700px;
   height: 500px;
 }
 .wrap{
@@ -68,30 +68,39 @@ circle {
 
 
 
-var width = 860,
-    height = 400;
+var width = 650,
+    height = 300;
 
 var parse = d3.time.format("%b %Y").parse;
-var xs = [];
-for (i=2017; i < 2117; i+=10){
-  xs.push(i);
-}
 
-var x = d3.scale.ordinal().
-    domain(xs).rangePoints([0, width]);
+var x = d3.scale.linear().
+    domain([0,65]).range([0, width]);
+
+var my_years = [0, 5, 10, 15, 20, 30, 40, 50];
+var my_probs = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
 
 var xAxis = d3.svg.axis()
     .scale(x)
-    .tickSize(2);
+    .tickSize(1)
+    .tickValues(my_years);
+
+var y = d3.scale.linear().
+    domain([0,1.1]).range([height, 0]);
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickSize(1)
+    .tickValues(my_probs);
 
 //console.log(xAxis);
 
-var points = d3.range(0, 11).map(function(i) {
-  return [ i * (width-40) / 10 + 20, height - i*(height-20)/10 - 20];
+var points = d3.range(0, 8).map(function(i) {
+  return [ my_years[i] * 10 + 30, height - 20];
 });
 
-var deriv_points = d3.range(0,11).map(function(i) {
-  return [ i * (width-40) / 10 + 20, height - i*(height-20)/10 - 20];
+var deriv_points = d3.range(0, 8).map(function(i) {
+  return [ my_years[i] * 10 + 30, height - 20];
 });
 
 var dragged = null,
@@ -110,7 +119,7 @@ var svgContainer = d3.select("body").append("div")
 var derivContainer = d3.select("body").append("div")
   .attr("width", width)
   .attr("height", height)
-  .attr("margin", "20px")
+  .attr("margin", "30px")
   .attr("border", "2px solid black")
   .attr("class", "wrap")
   .attr("id", "deriv");
@@ -137,9 +146,28 @@ svg.append("path")
     .call(redraw);
 
 svg.append("g")
-    .attr("transform", "translate(20," + (height - 20) + ")")
+    .attr("transform", "translate(30," + (height - 20) + ")")
     .attr("margin", "20px")
     .call(xAxis);
+
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + 30 + ",-20)")
+    .call(yAxis);
+
+svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height)
+    .text("Years from now");
+
+svg2.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height)
+    .text("Years from now");
 
 svg2.append("rect")
     .attr("width", width)
@@ -152,9 +180,14 @@ svg2.append("path")
     .call(redraw);
 
 svg2.append("g")
-    .attr("transform", "translate(20," + (height - 20) + ")")
+    .attr("transform", "translate(30," + (height - 20) + ")")
     .attr("margin", "20px")
     .call(xAxis);
+
+svg2.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + 30 + ",-20)")
+    .call(yAxis);
 
 d3.select(window)
     .on("mousemove", mousemove)
@@ -204,7 +237,7 @@ svg.node().focus();
 svg2.node().focus();
 
 d3.select("body").append("div")
-.text("Click me to generate PDF")
+.text("Click to generate PDF")
 .attr("class", "derive_button")
 .on("mousedown", function(d) { selected = dragged = d; redraw_derivative(); });
 
@@ -310,12 +343,13 @@ function mousedown() {
 function mousemove() {
   if (!dragged) return;
   var m = d3.mouse(svg.node());
+  dragged[0] = Math.max(30, Math.min(width, m[0]));
   var circs = svg.selectAll("circle");
   var circ_index = indexOfCircle(dragged);
   
 // Ensure that CDF is increasing
   if (circ_index > 0){
-    dragged[1] = Math.min(circs[0][circ_index -1].__data__[1], m[1]);
+    dragged[1] = Math.max(0, Math.min(circs[0][circ_index -1].__data__[1], m[1]));
   }
   else {
     dragged[1] = Math.max(0, Math.min(height, m[1]));
