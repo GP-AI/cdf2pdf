@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Spline Editor</title>
+<title>Forecasting</title>
 <style>
 
 body {
@@ -343,12 +343,13 @@ function mousedown() {
 function mousemove() {
   if (!dragged) return;
   var m = d3.mouse(svg.node());
+  dragged[0] = Math.max(30, Math.min(width, m[0]));
   var circs = svg.selectAll("circle");
   var circ_index = indexOfCircle(dragged);
   
 // Ensure that CDF is increasing
   if (circ_index > 0){
-    dragged[1] = Math.min(circs[0][circ_index -1].__data__[1], m[1]);
+    dragged[1] = Math.max(0, Math.min(circs[0][circ_index -1].__data__[1], m[1]));
   }
   else {
     dragged[1] = Math.max(0, Math.min(height, m[1]));
