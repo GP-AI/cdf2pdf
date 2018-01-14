@@ -69,15 +69,15 @@ circle {
 
 
 var width = 650,
-    height = 300;
+    height = 250;
 
 var parse = d3.time.format("%b %Y").parse;
 
 var x = d3.scale.linear().
-    domain([0,65]).range([0, width]);
+    domain([0,70]).range([0, width]);
 
-var my_years = [0, 5, 10, 15, 20, 30, 40, 50];
-var my_probs = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+var my_years = [0, 10, 20, 30, 40, 50];
+var my_probs = [0, 0.2, 0.4, 0.6, 0.8, 1];
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -85,7 +85,7 @@ var xAxis = d3.svg.axis()
     .tickValues(my_years);
 
 var y = d3.scale.linear().
-    domain([0,1.1]).range([height, 0]);
+    domain([0,1]).range([height, 40]);
 
 var yAxis = d3.svg.axis()
     .scale(y)
@@ -95,12 +95,12 @@ var yAxis = d3.svg.axis()
 
 //console.log(xAxis);
 
-var points = d3.range(0, 8).map(function(i) {
-  return [ my_years[i] * 10 + 30, height - 20];
+var points = d3.range(0, 6).map(function(i) {
+  return [ my_years[i] * (width/70) + 50, height - 20];
 });
 
-var deriv_points = d3.range(0, 8).map(function(i) {
-  return [ my_years[i] * 10 + 30, height - 20];
+var deriv_points = d3.range(0, 6).map(function(i) {
+  return [ my_years[i] * (width/70) + 50, height - 20];
 });
 
 var dragged = null,
@@ -112,13 +112,14 @@ var deriv_line = d3.svg.line().interpolate('monotone');
 
 var svgContainer = d3.select("body").append("div")
   .attr("width", width)
-  .attr("height", height+100)
+  .attr("height", height)
+  .attr("margin", "30px")
   .attr("border", "2px solid black")
   .attr("class", "wrap");
 
 var derivContainer = d3.select("body").append("div")
   .attr("width", width)
-  .attr("height", height)
+  .attr("height", height+100)
   .attr("margin", "30px")
   .attr("border", "2px solid black")
   .attr("class", "wrap")
@@ -146,13 +147,13 @@ svg.append("path")
     .call(redraw);
 
 svg.append("g")
-    .attr("transform", "translate(30," + (height - 20) + ")")
+    .attr("transform", "translate(50," + (height - 20) + ")")
     .attr("margin", "20px")
     .call(xAxis);
 
 svg.append("g")
     .attr("class", "axis")
-    .attr("transform", "translate(" + 30 + ",-20)")
+    .attr("transform", "translate(" + 50 + ",-20)")
     .call(yAxis);
 
 svg.append("text")
@@ -169,6 +170,22 @@ svg2.append("text")
     .attr("y", height)
     .text("Years from now");
 
+svg.append("text")
+    .attr("class", "y label")
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "end")
+    .attr("x", -20)
+    .attr("y", 15)
+    .text("Cumulative Distribution Function");
+
+svg2.append("text")
+    .attr("class", "y label")
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "end")
+    .attr("x", -20)
+    .attr("y", 15)
+    .text("Probability Density Function");
+
 svg2.append("rect")
     .attr("width", width)
     .attr("height", height)
@@ -180,13 +197,13 @@ svg2.append("path")
     .call(redraw);
 
 svg2.append("g")
-    .attr("transform", "translate(30," + (height - 20) + ")")
+    .attr("transform", "translate(50," + (height - 20) + ")")
     .attr("margin", "20px")
     .call(xAxis);
 
 svg2.append("g")
     .attr("class", "axis")
-    .attr("transform", "translate(" + 30 + ",-20)")
+    .attr("transform", "translate(" + 50 + ",-20)")
     .call(yAxis);
 
 d3.select(window)
@@ -285,13 +302,13 @@ function redraw_derivative() {
   var x_data = []
   for(i=0; i < cdf_data[0].length; i++){
     y_data[i] = -1* cdf_data[0][i].__data__[1]
-    x_data[i] = i*10
+    x_data[i] = my_years[i]*(width/70)
   }
   console.log(y_data);
   var f_prime = derive(x_data, y_data);
   console.log(f_prime);
   for(i=0; i < cdf_data[0].length; i++){
-    deriv_points[i] = [cdf_data[0][i].__data__[0], height - 20  - f_prime[i]*10]
+    deriv_points[i] = [cdf_data[0][i].__data__[0], height - 20 - f_prime[i]*(width/70)]
   }
   svg2.select("path").attr("d", deriv_line);
   var deriv_circle = svg2.selectAll("circle")
@@ -343,16 +360,17 @@ function mousedown() {
 function mousemove() {
   if (!dragged) return;
   var m = d3.mouse(svg.node());
-  dragged[0] = Math.max(30, Math.min(width, m[0]));
+  dragged[0] = Math.max(50, Math.min(width, m[0]));
   var circs = svg.selectAll("circle");
   var circ_index = indexOfCircle(dragged);
+
   
 // Ensure that CDF is increasing
   if (circ_index > 0){
-    dragged[1] = Math.max(0 + 1.1/300, Math.min(circs[0][circ_index -1].__data__[1], m[1]));
+    dragged[1] = Math.max(20, Math.min(circs[0][circ_index -1].__data__[1], m[1]))
   }
   else {
-    dragged[1] = Math.max(0 + 1.1/300, Math.min(height - 20, m[1]));
+    dragged[1] = Math.max(20, Math.min(height - 20, m[1]));
   }
   //console.log(m);
   redraw();
